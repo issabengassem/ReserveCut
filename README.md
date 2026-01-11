@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # ReservCut 🎨💇‍♀️
 
 Une plateforme de réservation en ligne pour salons de coiffure et beauté au Maroc, avec gestion des rendez-vous et notifications.
@@ -203,3 +204,6 @@ Ce projet est en cours de développement. N'hésitez pas à contribuer !
 ## 📄 Licence
 
 ISC
+=======
+# ReserveCut
+>>>>>>> f4875400dd460d61387e7b7cd2297b858f095c78
