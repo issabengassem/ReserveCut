@@ -1,5 +1,5 @@
 
-# ReservCut 🎨💇‍♀️
+# ReserveCut 🎨💇‍♀️
 
 Une plateforme de réservation en ligne pour salons de coiffure et beauté au Maroc, avec gestion des rendez-vous et notifications.
 
