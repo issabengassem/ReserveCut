@@ -21,7 +21,7 @@ CREATE TABLE IF NOT EXISTS users (
 CREATE TABLE IF NOT EXISTS salons (
   id INT AUTO_INCREMENT PRIMARY KEY,
   owner_id INT NOT NULL,
-  name VARCHAR(255) NOT NULL,
+  name VARCHAR(255) NOT NULL,i
   address TEXT NOT NULL,
   city VARCHAR(100) NOT NULL,
   phone VARCHAR(20),
@@ -49,7 +49,7 @@ CREATE TABLE IF NOT EXISTS services (
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   FOREIGN KEY (salon_id) REFERENCES salons(id) ON DELETE CASCADE,
-  INDEX idx_salon (salon_id),
+  INDEX idx_salon (salon_id), 
   INDEX idx_active (is_active)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 

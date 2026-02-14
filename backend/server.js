@@ -40,6 +40,15 @@ app.use('/api/services', serviceRoutes);
 app.use('/api/bookings', bookingRoutes);
 app.use('/api/notifications', notificationRoutes);
 
+app.get('/api/ping', (req, res) => {
+  res.json({ message: 'pong' });
+});
+
+app.get('/api/issa', (req, res) => {
+  res.json({ message: 'issa bengassem' });
+});
+
+
 // 404 Handler
 app.use((req, res) => {
   res.status(404).json({
@@ -57,9 +66,18 @@ app.use((err, req, res, next) => {
   });
 });
 
-app.listen(PORT, () => {
-  console.log(`🚀 Serveur ReservCut API démarré sur le port ${PORT}`);
-  console.log(`📍 Environnement: ${process.env.NODE_ENV || 'development'}`);
+app.get('/api/ping', (req, res) => {
+  res.json({ message: 'pong' });
 });
 
+
+app.listen(PORT, () => {
+  console.log(`Serveur ReservCut API démarré sur le port ${PORT}`);
+  console.log(`Environnement: ${process.env.NODE_ENV || 'development'}`);
+});
+
+
+
 module.exports = app;
+
+

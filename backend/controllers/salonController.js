@@ -1,19 +1,18 @@
 const Salon = require('../models/Salon');
 const Service = require('../models/Service');
 
+// 1. جلب جميع الصالونات مع دعم البحث والفلترة بالمدينة
 exports.getAllSalons = async (req, res) => {
   try {
     const { city, search } = req.query;
-    let salons = await Salon.findAll();
+    let salons = await Salon.findAll(); // s.* كتجيب image_url أوتوماتيكياً
 
-    // Filtrer par ville si spécifié
     if (city) {
       salons = salons.filter(salon => 
         salon.city.toLowerCase() === city.toLowerCase()
       );
     }
 
-    // Filtrer par recherche textuelle
     if (search) {
       const searchLower = search.toLowerCase();
       salons = salons.filter(salon =>
@@ -22,54 +21,44 @@ exports.getAllSalons = async (req, res) => {
       );
     }
 
-    res.json({
-      success: true,
-      data: { salons }
-    });
+    res.json({ success: true, data: { salons } });
   } catch (error) {
-    console.error('Erreur lors de la récupération des salons:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Erreur serveur'
-    });
+    console.error('Error in getAllSalons:', error);
+    res.status(500).json({ success: false, message: 'Erreur serveur' });
   }
 };
 
+// 2. جلب صالون محدد بـ ID مع الخدمات ديالو
 exports.getSalonById = async (req, res) => {
   try {
     const salon = await Salon.findById(req.params.id);
-    
-    if (!salon) {
-      return res.status(404).json({
-        success: false,
-        message: 'Salon non trouvé'
-      });
-    }
+    if (!salon) return res.status(404).json({ success: false, message: 'Salon non trouvé' });
 
-    // Récupérer les services du salon
     const services = await Service.findBySalonId(req.params.id);
-
-    res.json({
-      success: true,
-      data: {
-        salon,
-        services
-      }
-    });
+    res.json({ success: true, data: { salon, services } });
   } catch (error) {
-    console.error('Erreur lors de la récupération du salon:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Erreur serveur'
-    });
+    res.status(500).json({ success: false });
   }
 };
 
+// 3. إنشاء صالون جديد (يدعم الصور المرفوعة وروابط Google)
 exports.createSalon = async (req, res) => {
   try {
     const salonData = {
-      ...req.body,
-      owner_id: req.user.id
+      owner_id: 2, // المستخدم الافتراضي Salon Manager
+      name: req.body.salonName || null,
+      email: req.body.email || null,
+      phone: req.body.phone || null,
+      address: req.body.address || null, // NOT NULL في MySQL
+      city: req.body.city || "default",   // NOT NULL في MySQL
+      description: req.body.description || null,
+      opening_hours: req.body.openingHours ? JSON.stringify(req.body.openingHours) : null,
+      
+      // دعم image_url للروابط الخارجية
+      image_url: req.body.image_url || null, 
+      
+      // دعم image للصور الـ Binary
+      image: req.file ? req.file.buffer : null 
     };
 
     const salon = await Salon.create(salonData);
@@ -80,7 +69,7 @@ exports.createSalon = async (req, res) => {
       data: { salon }
     });
   } catch (error) {
-    console.error('Erreur lors de la création du salon:', error);
+    console.error('💥 Error in Salon.create:', error);
     res.status(500).json({
       success: false,
       message: 'Erreur serveur lors de la création'
@@ -88,54 +77,36 @@ exports.createSalon = async (req, res) => {
   }
 };
 
+// 4. تحديث بيانات الصالون
 exports.updateSalon = async (req, res) => {
   try {
     const salon = await Salon.findById(req.params.id);
+    if (!salon) return res.status(404).json({ success: false });
 
-    if (!salon) {
-      return res.status(404).json({
-        success: false,
-        message: 'Salon non trouvé'
-      });
+    // التحقق من الملكية (إلا كنتي مفعل الـ Auth)
+    if (req.user && salon.owner_id !== req.user.id) {
+      return res.status(403).json({ success: false, message: 'Non autorisé' });
     }
 
-    // Vérifier que l'utilisateur est le propriétaire
-    if (salon.owner_id !== req.user.id) {
-      return res.status(403).json({
-        success: false,
-        message: 'Vous n\'avez pas l\'autorisation de modifier ce salon'
-      });
-    }
+    const updatedData = {
+      ...req.body,
+      image: req.file ? req.file.buffer : undefined,
+      image_url: req.body.image_url || undefined
+    };
 
-    const updatedSalon = await Salon.update(req.params.id, req.body);
-
-    res.json({
-      success: true,
-      message: 'Salon mis à jour avec succès',
-      data: { salon: updatedSalon }
-    });
+    const updatedSalon = await Salon.update(req.params.id, updatedData);
+    res.json({ success: true, data: { salon: updatedSalon } });
   } catch (error) {
-    console.error('Erreur lors de la mise à jour du salon:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Erreur serveur lors de la mise à jour'
-    });
+    res.status(500).json({ success: false });
   }
 };
 
+// 5. جلب صالونات المستخدم الحالي
 exports.getMySalons = async (req, res) => {
   try {
     const salons = await Salon.findByOwnerId(req.user.id);
-
-    res.json({
-      success: true,
-      data: { salons }
-    });
+    res.json({ success: true, data: { salons } });
   } catch (error) {
-    console.error('Erreur lors de la récupération des salons:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Erreur serveur'
-    });
+    res.status(500).json({ success: false });
   }
 };
